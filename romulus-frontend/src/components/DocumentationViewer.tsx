@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-    BookOpen, Shield, Zap, AlertTriangle, CheckCircle,
-    Code, Target, Cpu, Activity, ChevronRight, ChevronDown,
-    Lock, Unlock, Timer, DollarSign, Info
+    BookOpen, Shield, Code, Target, Cpu, ChevronRight,
+    AlertTriangle, CheckCircle, Unlock, Info, ChevronDown
 } from 'lucide-react'
 
 interface DocSection {
@@ -19,7 +18,7 @@ interface DocSection {
 export function DocumentationViewer() {
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['overview']))
     const [activeSection, setActiveSection] = useState<string>('overview')
-    const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
+    const sectionRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({})
 
     const toggleSection = (section: string, shouldScroll = false) => {
         const newExpanded = new Set(expandedSections)
@@ -51,7 +50,7 @@ export function DocumentationViewer() {
     }
 
     // Track active section on scroll
-    useEffect(() => {
+    React.useEffect(() => {
         const handleScroll = () => {
             const scrollPosition = window.scrollY + 100
 
