@@ -1,6 +1,50 @@
-# Compiler files
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Foundry files
 cache/
 out/
+broadcast/
+
+# Dotenv file
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules/
+dist/
+build/
+
+# Coverage
+coverage/
+coverage.json
+lcov.info
+
+# Frontend specific
+romulus-frontend/.next/
+romulus-frontend/out/
+romulus-frontend/.vercel
+romulus-frontend/*.log
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Keys and sensitive data
+*.pem
+*.key
+*.keystore
 
 # Ignores development broadcast logs
 !/broadcast
@@ -9,6 +53,3 @@ out/
 
 # Docs
 docs/
-
-# Dotenv file
-.env
