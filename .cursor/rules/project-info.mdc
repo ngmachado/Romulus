@@ -1,0 +1,73 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Core project information and style guidelines
+alwaysApply: true
+---
+
+You are an expert in Solidity, TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind.
+
+## Technical Specifications
+
+### Code Style and Structure
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files: exported component, subcomponents, helpers, static content, types.
+
+### UI/Components
+- **Component Library:** shadcn/ui (based on Radix UI primitives)
+- **Styling:** Tailwind CSS v4 with custom theming via CSS variables
+- **Animations:** tw-animate-css for transitions and micro-interactions
+- **Icons:** lucide-react exclusively for consistent iconography
+- **Forms:** react-hook-form with zod validation
+- **Structure:** /components, /lib, /app
+- Don't create new components into components/ui/ folder because it is reserved for shadcn components.
+
+### Layout & Responsiveness
+- **Design Target:** Mobile-first at 375x812px (iPhone X) base size
+- **Breakpoints:** Follow Tailwind defaults (sm:640px, md:768px, lg:1024px, xl:1280px)
+- **Container Width:** Max-width of 1280px for desktop, full-width on mobile
+- **Grid System:** Use Tailwind's grid and flex utilities
+
+### Development Tools
+- **Linting:** ESLint v9 with Next.js configuration
+- **Code Formatting:** Follow Tailwind's class ordering convention
+- **Build Tools:** Turbopack for faster development experience
+- **State Management:** React hooks and context API (no Redux)
+
+### Performance Guidelines
+- **Image Optimization:** Use Next.js Image component with proper sizing
+- **Bundle Size:** Keep initial JS payload under 200KB (gzipped)
+- **Core Web Vitals:** Target LCP < 2.5s, FID < 100ms, CLS < 0.1
+
+### Accessibility Requirements
+- **Standards:** WCAG 2.1 AA compliance required
+- **Color Contrast:** Minimum 4.5:1 for normal text, 3:1 for large text
+- **Keyboard Navigation:** All interactive elements must be keyboard accessible
+- **Screen Readers:** Use proper ARIA attributes and semantic HTML
+
+## Design style
+- A **perfect balance** between **elegant minimalism** and **functional design**.
+- **Soft, refreshing gradient colors** that seamlessly integrate with the brand palette.
+- **Well-proportioned white space** for a clean layout.
+- **Light and immersive** user experience.
+- **Clear information hierarchy** using **subtle shadows and modular card layouts**.
+- **Natural focus** on core functionalities.
+- **Refined rounded corners**.
+- **Delicate micro-interactions**.
+- **Comfortable visual proportions**.
+- **Accent colors** chosen based on the app type.
+
+## UI/UX Principles
+- **Shadcn UI**, **Radix**, and **Tailwind** for components and styling.
+- Implement responsive design with **Tailwind**.
+- **Accessibility:** WCAG 2.1 AA, color contrast, keyboard nav
+- **Responsiveness:** 375x812px base, mobile-first
+- **Micro-interactions:** 150ms, ease-in-out
+- **Card Shadows:** Use --shadow-card for cards, --shadow-modal for modals
+- **Corner Radius:** 10px for cards, 8px for buttons
