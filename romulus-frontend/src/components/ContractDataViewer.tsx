@@ -12,7 +12,7 @@ export function ContractDataViewer() {
     const {
         owner,
         requestCounter,
-        currentRingPosition,
+        ringPosition,
         callbackGasLimit,
         ringStatus,
         entropyStats,
@@ -104,7 +104,7 @@ export function ContractDataViewer() {
 
                             <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
                                 <div className="text-2xl font-bold text-purple-400">
-                                    {currentRingPosition?.toString() || '0'}
+                                    {ringPosition?.toString() || '0'}
                                 </div>
                                 <div className="text-xs text-gray-400 mt-1">Ring Position</div>
                             </div>
