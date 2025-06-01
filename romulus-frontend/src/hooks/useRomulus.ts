@@ -399,7 +399,7 @@ export function useRomulusData() {
     return {
         owner: owner.data,
         requestCounter: requestCounter.data,
-        currentRingPosition: currentRingPosition.data,
+        ringPosition: currentRingPosition.data,
         callbackGasLimit: callbackGasLimit.data,
         ringStatus: ringStatus.data,
         entropyStats: entropyStats.data,
