@@ -1,9 +1,9 @@
 import { Address } from 'viem'
 
-// Romulus contract address
-export const ROMULUS_ADDRESS: Address = '0x7F81b3324d3BD1ae94493aF29B63126052ECAfdB'
+// RomulusV2 contract address - deployed on Base mainnet
+export const ROMULUS_ADDRESS: Address = '0x3E0b9b582B715967Ec6Fff2ec2a954cFF7528Ea5'
 
-// Romulus contract ABI (essential functions only)
+// RomulusV2 contract ABI (essential functions only)
 export const ROMULUS_ABI = [
     // Read functions
     {
@@ -23,6 +23,13 @@ export const ROMULUS_ABI = [
     {
         inputs: [],
         name: 'currentRingPosition',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'callbackGasLimit',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
@@ -49,14 +56,15 @@ export const ROMULUS_ABI = [
         stateMutability: 'view',
         type: 'function',
     },
+    // V2: requests struct has changed to use startBlock and span
     {
         inputs: [{ internalType: 'uint256', name: 'requestId', type: 'uint256' }],
         name: 'requests',
         outputs: [
             { internalType: 'address', name: 'clientContract', type: 'address' },
-            { internalType: 'uint256', name: 'revealBlock', type: 'uint256' },
+            { internalType: 'uint256', name: 'startBlock', type: 'uint256' },
+            { internalType: 'uint16', name: 'span', type: 'uint16' },
             { internalType: 'bytes', name: 'data', type: 'bytes' },
-            { internalType: 'uint256', name: 'hashCount', type: 'uint256' },
         ],
         stateMutability: 'view',
         type: 'function',
@@ -83,6 +91,17 @@ export const ROMULUS_ABI = [
         stateMutability: 'view',
         type: 'function',
     },
+    // V2: New function for getting reveal timing
+    {
+        inputs: [{ internalType: 'uint256', name: 'requestId', type: 'uint256' }],
+        name: 'getRevealTime',
+        outputs: [
+            { internalType: 'uint256', name: 'canRevealAt', type: 'uint256' },
+            { internalType: 'uint256', name: 'estimatedSeconds', type: 'uint256' },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+    },
     // Write functions
     {
         inputs: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
@@ -91,12 +110,20 @@ export const ROMULUS_ABI = [
         stateMutability: 'nonpayable',
         type: 'function',
     },
+    // V2: Request function with span instead of revealBlock and hashCount
     {
         inputs: [
-            { internalType: 'uint256', name: 'revealBlock', type: 'uint256' },
             { internalType: 'bytes', name: 'data', type: 'bytes' },
-            { internalType: 'uint256', name: 'hashCount', type: 'uint256' },
+            { internalType: 'uint16', name: 'span', type: 'uint16' },
         ],
+        name: 'requestRandomNumber',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    // V2: Request function with default span
+    {
+        inputs: [{ internalType: 'bytes', name: 'data', type: 'bytes' }],
         name: 'requestRandomNumber',
         outputs: [],
         stateMutability: 'nonpayable',
@@ -123,13 +150,21 @@ export const ROMULUS_ABI = [
         stateMutability: 'nonpayable',
         type: 'function',
     },
+    // V2: Gas limit management
+    {
+        inputs: [{ internalType: 'uint256', name: 'newLimit', type: 'uint256' }],
+        name: 'setCallbackGasLimit',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
     // Events
     {
         anonymous: false,
         inputs: [
             { indexed: false, internalType: 'uint256', name: 'requestId', type: 'uint256' },
-            { indexed: false, internalType: 'uint256', name: 'revealBlock', type: 'uint256' },
-            { indexed: false, internalType: 'uint256', name: 'hashCount', type: 'uint256' },
+            { indexed: false, internalType: 'uint256', name: 'startBlock', type: 'uint256' },
+            { indexed: false, internalType: 'uint16', name: 'span', type: 'uint16' },
         ],
         name: 'RandomNumberRequested',
         type: 'event',
@@ -141,6 +176,25 @@ export const ROMULUS_ABI = [
             { indexed: false, internalType: 'uint256', name: 'randomNumber', type: 'uint256' },
         ],
         name: 'RandomNumberRevealed',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            { indexed: false, internalType: 'uint256', name: 'requestId', type: 'uint256' },
+            { indexed: false, internalType: 'address', name: 'clientContract', type: 'address' },
+            { indexed: false, internalType: 'bytes', name: 'reason', type: 'bytes' },
+        ],
+        name: 'CallbackFailed',
+        type: 'event',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            { indexed: false, internalType: 'uint256', name: 'oldLimit', type: 'uint256' },
+            { indexed: false, internalType: 'uint256', name: 'newLimit', type: 'uint256' },
+        ],
+        name: 'CallbackGasLimitUpdated',
         type: 'event',
     },
     {
@@ -164,17 +218,68 @@ export const ROMULUS_ABI = [
         name: 'InstantRandomDelivered',
         type: 'event',
     },
-    // Constants
+    {
+        anonymous: false,
+        inputs: [
+            { indexed: false, internalType: 'uint256', name: 'currentBlock', type: 'uint256' },
+            { indexed: false, internalType: 'uint256', name: 'lastGeneration', type: 'uint256' },
+        ],
+        name: 'RingRefreshNeeded',
+        type: 'event',
+    },
+    // V2 Constants
     {
         inputs: [],
-        name: 'MIN_DELAY',
+        name: 'DEFAULT_SPAN',
+        outputs: [{ internalType: 'uint16', name: '', type: 'uint16' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'MIN_SPAN',
+        outputs: [{ internalType: 'uint16', name: '', type: 'uint16' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'MAX_SPAN',
+        outputs: [{ internalType: 'uint16', name: '', type: 'uint16' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'GRACE',
+        outputs: [{ internalType: 'uint16', name: '', type: 'uint16' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'MIN_CALLBACK_GAS',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'MAX_HASH_COUNT',
+        name: 'MAX_CALLBACK_GAS',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'BASE_BLOCK_TIME',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'EIP_2935_HISTORY_WINDOW',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',

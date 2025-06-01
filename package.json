@@ -1,0 +1,30 @@
+{
+    "name": "romulus-v2",
+    "version": "1.0.0",
+    "description": "RomulusV2 Randomness Oracle",
+    "main": "index.js",
+    "scripts": {
+        "maintain-buffer": "tsx scripts/maintain-buffer.ts",
+        "maintain-buffer:dev": "tsx watch scripts/maintain-buffer.ts",
+        "build": "forge build",
+        "test": "forge test",
+        "deploy:v2": "forge script script/DeployV2.s.sol"
+    },
+    "dependencies": {
+        "ethers": "^6.8.1",
+        "dotenv": "^16.3.1"
+    },
+    "devDependencies": {
+        "tsx": "^4.1.0",
+        "typescript": "^5.2.2",
+        "@types/node": "^20.8.0"
+    },
+    "keywords": [
+        "randomness",
+        "oracle",
+        "ethereum",
+        "solidity"
+    ],
+    "author": "Superfluid",
+    "license": "MIT"
+}

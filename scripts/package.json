@@ -1,0 +1,28 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "RomulusV2 maintenance scripts",
+  "main": "index.js",
+  "scripts": {
+    "maintain": "ROMULUS_V2_ADDRESS=0x3E0b9b582B715967Ec6Fff2ec2a954cFF7528Ea5 RPC_URL=https://mainnet.base.org tsx maintain-buffer.ts",
+    "check": "ROMULUS_V2_ADDRESS=0x3E0b9b582B715967Ec6Fff2ec2a954cFF7528Ea5 RPC_URL=https://mainnet.base.org tsx check-status.ts",
+    "quick": "./simple-check.sh",
+    "monitor": "watch -n 30 './simple-check.sh'",
+    "check-status": "ROMULUS_V2_ADDRESS=0x3E0b9b582B715967Ec6Fff2ec2a954cFF7528Ea5 RPC_URL=https://mainnet.base.org tsx maintain-buffer.ts --check-only",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "romulus",
+    "randomness",
+    "maintenance"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^22.15.29",
+    "dotenv": "^16.5.0",
+    "ethers": "^6.14.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

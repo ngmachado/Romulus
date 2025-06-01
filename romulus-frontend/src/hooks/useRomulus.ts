@@ -28,6 +28,13 @@ export function useCurrentRingPosition() {
     })
 }
 
+export function useCallbackGasLimit() {
+    return useReadContract({
+        ...romulusContract,
+        functionName: 'callbackGasLimit',
+    })
+}
+
 export function useRingStatus() {
     return useReadContract({
         ...romulusContract,
@@ -66,18 +73,69 @@ export function useIsRequestValid(requestId: number) {
     })
 }
 
-// Contract constants
-export function useMinDelay() {
+// V2: New function for getting reveal timing
+export function useGetRevealTime(requestId: number) {
     return useReadContract({
         ...romulusContract,
-        functionName: 'MIN_DELAY',
+        functionName: 'getRevealTime',
+        args: [BigInt(requestId)],
     })
 }
 
-export function useMaxHashCount() {
+// V2 Contract constants
+export function useDefaultSpan() {
     return useReadContract({
         ...romulusContract,
-        functionName: 'MAX_HASH_COUNT',
+        functionName: 'DEFAULT_SPAN',
+    })
+}
+
+export function useMinSpan() {
+    return useReadContract({
+        ...romulusContract,
+        functionName: 'MIN_SPAN',
+    })
+}
+
+export function useMaxSpan() {
+    return useReadContract({
+        ...romulusContract,
+        functionName: 'MAX_SPAN',
+    })
+}
+
+export function useGrace() {
+    return useReadContract({
+        ...romulusContract,
+        functionName: 'GRACE',
+    })
+}
+
+export function useMinCallbackGas() {
+    return useReadContract({
+        ...romulusContract,
+        functionName: 'MIN_CALLBACK_GAS',
+    })
+}
+
+export function useMaxCallbackGas() {
+    return useReadContract({
+        ...romulusContract,
+        functionName: 'MAX_CALLBACK_GAS',
+    })
+}
+
+export function useBaseBlockTime() {
+    return useReadContract({
+        ...romulusContract,
+        functionName: 'BASE_BLOCK_TIME',
+    })
+}
+
+export function useEIP2935HistoryWindow() {
+    return useReadContract({
+        ...romulusContract,
+        functionName: 'EIP_2935_HISTORY_WINDOW',
     })
 }
 
@@ -202,6 +260,7 @@ export function useGetInstantRandom() {
     }
 }
 
+// V2: Updated requestRandomNumber to use span instead of revealBlock and hashCount
 export function useRequestRandomNumber() {
     const { writeContract, data: hash, isPending, error } = useWriteContract()
 
@@ -209,17 +268,29 @@ export function useRequestRandomNumber() {
         hash,
     })
 
-    const requestRandomNumber = (revealBlock: number, data: string, hashCount: number) => {
+    // Request with custom span
+    const requestRandomNumber = (data: string, span: number) => {
         const encodedData = encodePacked(['string'], [data])
         writeContract({
             ...romulusContract,
             functionName: 'requestRandomNumber',
-            args: [BigInt(revealBlock), encodedData, BigInt(hashCount)],
+            args: [encodedData, span],
+        })
+    }
+
+    // Request with default span
+    const requestRandomNumberDefault = (data: string) => {
+        const encodedData = encodePacked(['string'], [data])
+        writeContract({
+            ...romulusContract,
+            functionName: 'requestRandomNumber',
+            args: [encodedData],
         })
     }
 
     return {
         requestRandomNumber,
+        requestRandomNumberDefault,
         hash,
         isPending,
         isConfirming,
@@ -277,15 +348,50 @@ export function useGenerateSeed() {
     }
 }
 
-// Combined hook for all contract data
+// V2: New hook for setting callback gas limit
+export function useSetCallbackGasLimit() {
+    const { writeContract, data: hash, isPending, error } = useWriteContract()
+
+    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+        hash,
+    })
+
+    const setCallbackGasLimit = (newLimit: number) => {
+        writeContract({
+            ...romulusContract,
+            functionName: 'setCallbackGasLimit',
+            args: [BigInt(newLimit)],
+        })
+    }
+
+    return {
+        setCallbackGasLimit,
+        hash,
+        isPending,
+        isConfirming,
+        isSuccess,
+        error,
+    }
+}
+
+// Comprehensive hook for all Romulus data
 export function useRomulusData() {
     const owner = useRomulusOwner()
     const requestCounter = useRequestCounter()
-    const ringPosition = useCurrentRingPosition()
+    const currentRingPosition = useCurrentRingPosition()
+    const callbackGasLimit = useCallbackGasLimit()
     const ringStatus = useRingStatus()
     const entropyStats = useEntropyStats()
-    const minDelay = useMinDelay()
-    const maxHashCount = useMaxHashCount()
+
+    // V2 Constants
+    const defaultSpan = useDefaultSpan()
+    const minSpan = useMinSpan()
+    const maxSpan = useMaxSpan()
+    const grace = useGrace()
+    const minCallbackGas = useMinCallbackGas()
+    const maxCallbackGas = useMaxCallbackGas()
+    const baseBlockTime = useBaseBlockTime()
+    const eip2935HistoryWindow = useEIP2935HistoryWindow()
     const ringSize = useRingSize()
     const seedRefreshInterval = useSeedRefreshInterval()
     const hashesPerSeed = useHashesPerSeed()
@@ -293,17 +399,27 @@ export function useRomulusData() {
     return {
         owner: owner.data,
         requestCounter: requestCounter.data,
-        ringPosition: ringPosition.data,
+        currentRingPosition: currentRingPosition.data,
+        callbackGasLimit: callbackGasLimit.data,
         ringStatus: ringStatus.data,
         entropyStats: entropyStats.data,
+
+        // V2 Constants
         constants: {
-            minDelay: minDelay.data,
-            maxHashCount: maxHashCount.data,
+            defaultSpan: defaultSpan.data,
+            minSpan: minSpan.data,
+            maxSpan: maxSpan.data,
+            grace: grace.data,
+            minCallbackGas: minCallbackGas.data,
+            maxCallbackGas: maxCallbackGas.data,
+            baseBlockTime: baseBlockTime.data,
+            eip2935HistoryWindow: eip2935HistoryWindow.data,
             ringSize: ringSize.data,
             seedRefreshInterval: seedRefreshInterval.data,
             hashesPerSeed: hashesPerSeed.data,
         },
-        isLoading: owner.isLoading || requestCounter.isLoading || ringStatus.isLoading,
-        error: owner.error || requestCounter.error || ringStatus.error,
+
+        isLoading: owner.isLoading || requestCounter.isLoading || ringStatus.isLoading || entropyStats.isLoading,
+        error: owner.error || requestCounter.error || ringStatus.error || entropyStats.error,
     }
 } 

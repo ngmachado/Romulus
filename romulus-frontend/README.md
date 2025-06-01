@@ -1,215 +1,155 @@
-# 🏛️ Romulus Frontend
+# Romulus V2 Frontend
 
-A beautiful, modern frontend to showcase the Romulus randomness oracle in action. Built with Next.js, TypeScript, and Tailwind CSS.
+A Next.js frontend application for interacting with the RomulusV2 randomness oracle on Base.
 
-## Overview
+## 🚀 **What's New in V2**
 
-Romulus is a dual randomness oracle tailored for the Base network, offering two distinct modes:
+### **Contract Upgrade**
+- **New Address**: `0x3E0b9b582B715967Ec6Fff2ec2a954cFF7528Ea5` (Base Mainnet)
+- **Span-Based Architecture**: Replace `revealBlock` + `hashCount` with user-defined `span`
+- **Enhanced Security**: Fixed span starting immediately after request eliminates sequencer bias
+- **Gas Optimization**: Predictable costs based on span size
 
-- **Commit-Reveal Mode**: High-security, two-transaction process for critical applications
-- **Instant Ring Mode**: Fast pre-generated randomness system for less critical needs
+### **V2 Features**
+- **Flexible Spans**: Choose 8-4000 blocks based on security needs (default: 64)
+- **Callback Gas Limits**: Configurable gas limits prevent griefing attacks  
+- **Enhanced Entropy**: Every interaction contributes to system entropy
+- **New Functions**: `getRevealTime()`, callback management, improved constants
 
-This frontend provides an interactive demonstration of both modes with real-time monitoring capabilities.
+## 🔧 **Key Interface Changes**
 
-## Features
+### **Request Function (V1 → V2)**
+```typescript
+// V1 (Old)
+requestRandomNumber(revealBlock: number, data: string, hashCount: number)
 
-### 🎯 Interactive Demos
-- **Commit-Reveal Demo**: Simulate the two-phase randomness generation process
-- **Instant Ring Demo**: Experience immediate randomness from the ring buffer
-- **Ring Status Monitor**: Real-time health monitoring of the 24-slot ring buffer
-- **Entropy Stats**: Track entropy accumulation and blockchain state
-
-### 🎨 Modern Design
-- **Glass Morphism**: Beautiful translucent cards with backdrop blur
-- **Gradient Backgrounds**: Soft, refreshing color schemes
-- **Responsive Layout**: Mobile-first design optimized for all devices
-- **Micro-interactions**: Smooth animations and transitions
-
-### 📊 Real-time Monitoring
-- Ring buffer health visualization
-- Entropy accumulation tracking
-- Blockchain state monitoring
-- Security feature explanations
-
-## Tech Stack
-
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **Components**: shadcn/ui (Radix UI primitives)
-- **Icons**: Lucide React
-- **Animations**: Custom CSS animations
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+ 
-- pnpm (recommended) or npm/yarn
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd romulus-frontend
+// V2 (New)
+requestRandomNumber(data: string, span: number)          // Custom span
+requestRandomNumber(data: string)                        // Default 64-block span
 ```
 
-2. Install dependencies:
+### **Request Data Structure**
+```typescript
+// V1 Request
+{
+  clientContract: address,
+  revealBlock: uint256,
+  data: bytes,
+  hashCount: uint256
+}
+
+// V2 Request  
+{
+  clientContract: address,
+  startBlock: uint256,     // Always requestBlock + 1
+  span: uint16,           // Number of blocks to use
+  data: bytes
+}
+```
+
+### **New V2 Constants**
+- `DEFAULT_SPAN`: 64 blocks (~130 seconds)
+- `MIN_SPAN`: 8 blocks minimum
+- `MAX_SPAN`: 4000 blocks maximum  
+- `GRACE`: 1 block wait after span completion
+- `callbackGasLimit`: 50,000 gas (configurable)
+
+## 🛠 **Development**
+
+### **Setup**
 ```bash
+npm install
+# or
 pnpm install
 ```
 
-3. Start the development server:
+### **Run Development Server**
 ```bash
+npm run dev
+# or  
 pnpm dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── globals.css          # Global styles and custom CSS
-│   ├── layout.tsx           # Root layout
-│   └── page.tsx             # Home page
-├── components/
-│   ├── ui/                  # shadcn/ui components
-│   ├── romulus-demo.tsx     # Main demo component
-│   ├── commit-reveal-demo.tsx # Commit-reveal interface
-│   ├── instant-ring-demo.tsx  # Instant ring interface
-│   ├── ring-status-monitor.tsx # Ring buffer monitoring
-│   └── entropy-stats.tsx    # Entropy statistics
-└── lib/
-    └── utils.ts             # Utility functions
-```
-
-## Components Overview
-
-### RomulusDemo
-Main component that orchestrates the entire demo experience with tabbed navigation.
-
-### CommitRevealDemo
-Interactive simulation of the commit-reveal process:
-- Request form with validation
-- Progress tracking
-- Reveal functionality
-- Security feature explanations
-
-### InstantRingDemo
-Real-time instant randomness generation:
-- One-click random number generation
-- Ring buffer visualization
-- Usage tracking
-- Performance metrics
-
-### RingStatusMonitor
-Comprehensive monitoring dashboard:
-- 24-slot ring buffer health
-- Individual seed status
-- Health alerts and warnings
-- Technical specifications
-
-### EntropyStats
-Entropy accumulation tracking:
-- Real-time entropy statistics
-- Blockchain state monitoring
-- Security guarantees
-- Non-manipulable source verification
-
-## Design System
-
-### Colors
-- **Primary**: Blue to Indigo gradient
-- **Secondary**: Green to Blue gradient  
-- **Accent**: Purple to Orange gradient
-- **Status Colors**: Green (success), Yellow (warning), Red (error)
-
-### Typography
-- **Headings**: Bold, gradient text effects
-- **Body**: Clean, readable sans-serif
-- **Code**: Monospace for hashes and technical data
-
-### Layout
-- **Mobile-first**: 375px base width
-- **Responsive breakpoints**: sm:640px, md:768px, lg:1024px, xl:1280px
-- **Container**: Max-width 1280px with proper padding
-
-## Key Features Demonstrated
-
-### Security Features
-- Future block hash unpredictability
-- Multi-block entropy combination
-- Forward secrecy in ring buffer
-- Non-replayable random numbers
-
-### Base Network Optimization
-- EIP-2935 compliance (8,191 block history)
-- 2-second block time considerations
-- Gas efficiency optimizations
-- 4.5-hour history window management
-
-### Entropy Sources
-- Block timestamps (network consensus)
-- Block difficulty/prevrandao (PoS beacon)
-- Previous block hashes (immutable)
-- Gas remaining (execution context)
-
-## Development
-
-### Available Scripts
-- `pnpm dev` - Start development server
-- `pnpm build` - Build for production
-- `pnpm start` - Start production server
-- `pnpm lint` - Run ESLint
-
-### Adding Components
-Use shadcn/ui CLI to add new components:
+### **Environment Variables**
 ```bash
-npx shadcn@latest add [component-name]
+# .env.local
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id
 ```
 
-### Customization
-- Modify `src/app/globals.css` for global styles
-- Update color variables in CSS custom properties
-- Extend Tailwind config for additional utilities
+## 📋 **Usage Examples**
 
-## Performance
+### **Basic Randomness Request**
+```typescript
+import { useRequestRandomNumber } from '@/hooks/useRomulus'
 
-- **Bundle Size**: Optimized for < 200KB initial JS payload
-- **Core Web Vitals**: LCP < 2.5s, FID < 100ms, CLS < 0.1
-- **Image Optimization**: Next.js Image component with proper sizing
-- **Code Splitting**: Automatic route-based splitting
+// Use default 64-block span (recommended)
+const { requestRandomNumberDefault } = useRequestRandomNumber()
+requestRandomNumberDefault("my-game-round-123")
 
-## Accessibility
+// Use custom span for specific security needs
+const { requestRandomNumber } = useRequestRandomNumber()
+requestRandomNumber("high-value-lottery", 128)  // Extra secure
+```
 
-- **WCAG 2.1 AA**: Full compliance
-- **Color Contrast**: 4.5:1 minimum for normal text
-- **Keyboard Navigation**: All interactive elements accessible
-- **Screen Readers**: Proper ARIA attributes and semantic HTML
+### **Getting Reveal Timing**
+```typescript
+import { useGetRevealTime } from '@/hooks/useRomulus'
 
-## Browser Support
+const { data: revealInfo } = useGetRevealTime(requestId)
+// Returns: [canRevealAt: bigint, estimatedSeconds: bigint]
+```
 
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
+### **Real-time Contract Data**
+```typescript
+import { useRomulusData } from '@/hooks/useRomulus'
 
-## Contributing
+const {
+  requestCounter,
+  ringStatus,
+  entropyStats,
+  callbackGasLimit,
+  constants: { defaultSpan, minSpan, maxSpan }
+} = useRomulusData()
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+## 🔐 **Security Recommendations**
 
-## License
+### **Span Selection Guide**
+- **8-16 blocks**: Low-stakes gaming, UI randomness
+- **32-64 blocks**: Standard applications (default)
+- **128+ blocks**: High-value financial applications
+- **Consider**: Higher spans = more security + longer wait times
 
-MIT License - see LICENSE file for details
+### **Integration Best Practices**
+- Implement `IRandomNumberConsumer` interface for callbacks
+- Handle callback failures gracefully in your contract
+- Monitor gas limits to prevent callback failures  
+- Use `getRevealTime()` to estimate completion timing
 
-## Related
+## 📚 **Architecture**
 
-- [Romulus Smart Contract](../src/Romulus.sol) - The core randomness oracle
-- [Base Network Documentation](https://docs.base.org/) - Base blockchain details
-- [EIP-2935](https://eips.ethereum.org/EIPS/eip-2935) - Block hash history specification
+### **Components**
+- `ContractDataViewer`: Real-time V2 contract statistics
+- `EntropyStats`: Visual entropy accumulation tracking
+- `RandomnessDemo`: Interactive examples for both modes
+
+### **Hooks**  
+- `useRomulusData()`: Complete contract state
+- `useRequestRandomNumber()`: V2 span-based requests
+- `useGetRevealTime()`: Timing predictions
+- `useSetCallbackGasLimit()`: Gas limit management
+
+## 🌐 **Deployment**
+
+The app is optimized for deployment on Vercel:
+
+```bash
+npm run build
+```
+
+## 📖 **Learn More**
+
+- [RomulusV2 Documentation](../README.md)
+- [Base Network](https://base.org/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Contract on Basescan](https://basescan.org/address/0x3E0b9b582B715967Ec6Fff2ec2a954cFF7528Ea5)
